@@ -1,8 +1,8 @@
 import express from 'express';
-import controller from '../controllers/bookings';
+import controller from '../controllers/bookings.js';
 const router = express.Router();
 
 router.get('/', controller.healthCheck);
 router.post('/api/v1/booking/', controller.createBooking);
 
-export = router;
+export default router;

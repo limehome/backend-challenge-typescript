@@ -1,0 +1,12 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: typescript-application
+    volumes:
+      - ./src:/app/src
+      - ./test:/app/test
+      - ./data:/app/data
+    ports:
+      - '8000:8000'
+    restart: "no"

@@ -1,6 +1,10 @@
-import axios, { AxiosError } from 'axios';
-import { startServer, stopServer } from '../source/server';
+import { describe, it, before, after, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import { startServer, stopServer } from '../src/server';
 import { PrismaClient } from '@prisma/client';
+
+const BASE_URL = 'http://localhost:8000';
+const prisma = new PrismaClient();
 
 const GUEST_A_UNIT_1 = {
     unitID: '1',
@@ -23,108 +27,80 @@ const GUEST_B_UNIT_1 = {
     numberOfNights: 5,
 };
 
-const prisma = new PrismaClient();
+async function postBooking(data: object) {
+    return fetch(`${BASE_URL}/api/v1/booking`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+}
 
-beforeEach(async () => {
-    // Clear any test setup or state before each test
-    await prisma.booking.deleteMany();
-});
-
-beforeAll(async () => {
+before(async () => {
     await startServer();
 });
 
-afterAll(async () => {
+after(async () => {
     await prisma.$disconnect();
     await stopServer();
 });
 
+beforeEach(async () => {
+    await prisma.booking.deleteMany();
+});
+
 describe('Booking API', () => {
-
-    test('Create fresh booking', async () => {
-        const response = await axios.post('http://localhost:8000/api/v1/booking', GUEST_A_UNIT_1);
-
-        expect(response.status).toBe(200);
-        expect(response.data.guestName).toBe(GUEST_A_UNIT_1.guestName);
-        expect(response.data.unitID).toBe(GUEST_A_UNIT_1.unitID);
-        expect(response.data.numberOfNights).toBe(GUEST_A_UNIT_1.numberOfNights);
+    it('Create fresh booking', async () => {
+        const response = await postBooking(GUEST_A_UNIT_1);
+        assert.equal(response.status, 200);
+        const data = await response.json() as Record<string, unknown>;
+        assert.equal(data.guestName, GUEST_A_UNIT_1.guestName);
+        assert.equal(data.unitID, GUEST_A_UNIT_1.unitID);
+        assert.equal(data.numberOfNights, GUEST_A_UNIT_1.numberOfNights);
     });
 
-    test('Same guest same unit booking', async () => {
-        // Create first booking
-        const response1 = await axios.post('http://localhost:8000/api/v1/booking', GUEST_A_UNIT_1);
-        expect(response1.status).toBe(200);
-        expect(response1.data.guestName).toBe(GUEST_A_UNIT_1.guestName);
-        expect(response1.data.unitID).toBe(GUEST_A_UNIT_1.unitID);
+    it('Same guest same unit booking', async () => {
+        let response = await postBooking(GUEST_A_UNIT_1);
+        assert.equal(response.status, 200);
 
-        // Guests want to book the same unit again
-        let error: any;
-        try {
-            await axios.post('http://localhost:8000/api/v1/booking', GUEST_A_UNIT_1);
-        } catch (e) {
-            error = e;
-        }
-
-        expect(error).toBeInstanceOf(AxiosError);
-        expect(error.response.status).toBe(400);
-        expect(error.response.data).toEqual('The given guest name cannot book the same unit multiple times');
+        response = await postBooking(GUEST_A_UNIT_1);
+        assert.equal(response.status, 400);
+        const message = await response.json();
+        assert.equal(message, 'The given guest name cannot book the same unit multiple times');
     });
 
-    test('Same guest different unit booking', async () => {
-        // Create first booking
-        const response1 = await axios.post('http://localhost:8000/api/v1/booking', GUEST_A_UNIT_1);
-        expect(response1.status).toBe(200);
-        expect(response1.data.guestName).toBe(GUEST_A_UNIT_1.guestName);
-        expect(response1.data.unitID).toBe(GUEST_A_UNIT_1.unitID);
+    it('Same guest different unit booking', async () => {
+        let response = await postBooking(GUEST_A_UNIT_1);
+        assert.equal(response.status, 200);
 
-        // Guest wants to book another unit
-        let error: any;
-        try {
-            await axios.post('http://localhost:8000/api/v1/booking', GUEST_A_UNIT_2);
-        } catch (e) {
-            error = e;
-        }
-
-        expect(error).toBeInstanceOf(AxiosError);
-        expect(error.response.status).toBe(400);
-        expect(error.response.data).toEqual('The same guest cannot be in multiple units at the same time');
+        response = await postBooking(GUEST_A_UNIT_2);
+        assert.equal(response.status, 400);
+        const message = await response.json();
+        assert.equal(message, 'The same guest cannot be in multiple units at the same time');
     });
 
-    test('Different guest same unit booking', async () => {
-        // Create first booking
-        const response1 = await axios.post('http://localhost:8000/api/v1/booking', GUEST_A_UNIT_1);
-        expect(response1.status).toBe(200);
-        expect(response1.data.guestName).toBe(GUEST_A_UNIT_1.guestName);
-        expect(response1.data.unitID).toBe(GUEST_A_UNIT_1.unitID);
+    it('Different guest same unit booking', async () => {
+        let response = await postBooking(GUEST_A_UNIT_1);
+        assert.equal(response.status, 200);
 
-        // GuestB trying to book a unit that is already occupied
-        let error: any;
-        try {
-            await axios.post('http://localhost:8000/api/v1/booking', GUEST_B_UNIT_1);
-        } catch (e) {
-            error = e;
-        }
-
-        expect(error).toBeInstanceOf(AxiosError);
-        expect(error.response.status).toBe(400);
-        expect(error.response.data).toEqual('For the given check-in date, the unit is already occupied');
+        response = await postBooking(GUEST_B_UNIT_1);
+        assert.equal(response.status, 400);
+        const message = await response.json();
+        assert.equal(message, 'For the given check-in date, the unit is already occupied');
     });
 
-    test('Different guest same unit booking different date', async () => {
-        // Create first booking
-        const response1 = await axios.post('http://localhost:8000/api/v1/booking', GUEST_A_UNIT_1);
-        expect(response1.status).toBe(200);
-        expect(response1.data.guestName).toBe(GUEST_A_UNIT_1.guestName);
+    it('Different guest same unit booking different date', async () => {
+        const response1 = await postBooking(GUEST_A_UNIT_1);
+        assert.equal(response1.status, 200);
 
-        // GuestB trying to book a unit that is already occupied
-        const response2 = await axios.post('http://localhost:8000/api/v1/booking', {
+        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const response2 = await postBooking({
             unitID: '1',
             guestName: 'GuestB',
-            checkInDate: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            numberOfNights: 5
+            checkInDate: tomorrow,
+            numberOfNights: 5,
         });
-
-        expect(response2.status).toBe(400);
-        expect(response2.data.detail).toBe('For the given check-in date, the unit is already occupied');
+        assert.equal(response2.status, 400);
+        const message = await response2.json();
+        assert.equal(message, 'For the given check-in date, the unit is already occupied');
     });
 });

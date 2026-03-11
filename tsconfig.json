@@ -1,12 +1,14 @@
 {
     "compilerOptions": {
         "forceConsistentCasingInFileNames": true,
-        "module": "commonjs",
-        "esModuleInterop": true,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "outDir": "./build",
-        "rootDir": "./source",
-        "target": "es6",
+        "rootDir": "./src",
+        "target": "ES2022",
+        "lib": ["ES2022"],
         "skipLibCheck": true,
-        "strict": true
+        "strict": true,
+        "resolveJsonModule": true
     }
 }

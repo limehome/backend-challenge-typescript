@@ -1,28 +1,22 @@
 import http from 'http';
 import express, { Express, NextFunction, Request, Response } from 'express';
 import morgan from 'morgan';
-import routes from './routes/bookings';
-import prisma from './prisma';
+import routes from './routes/bookings.js';
+import prisma from './prisma.js';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './swagger.json' with { type: 'json' };
 
 export const app: Express = express();
 
-// Logging
 app.use(morgan('dev'));
-
-// Parse the request
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Swagger
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger.json');
 app.use('/api-docs', swaggerUi.serve);
 app.get('/api-docs', swaggerUi.setup(swaggerDocument));
 
-// Routes
 app.use('/', routes);
 
-// Error handling
 app.use((req: Request, res: Response, next: NextFunction) => {
     const error = new Error('Not found');
     res.status(404).json({
@@ -30,7 +24,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-// Server
 let server: http.Server;
 
 export async function startServer() {
@@ -61,8 +54,6 @@ export async function stopServer() {
 async function initialize() {
     try {
         await prisma.$connect();
-
-        // Start the server if not running
         if (!server) {
             await startServer();
         }
@@ -73,8 +64,10 @@ async function initialize() {
     }
 }
 
-initialize().then(() => {
-    console.log('Initialized');
-}).catch((error) => {
-    console.error(error);
-});
+if (process.env.NODE_ENV !== 'test') {
+    initialize().then(() => {
+        console.log('Initialized');
+    }).catch((error) => {
+        console.error(error);
+    });
+}
