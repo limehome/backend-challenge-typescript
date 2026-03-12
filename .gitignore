@@ -1,5 +1,28 @@
-node_modules
-.swp
-.idea
-coverage
-app.db
+# Node
+node_modules/
+
+# Build
+build/
+dist/
+
+# Database
+data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Testing
+coverage/
+
+# IDEs – JetBrains
+.idea/
+
+# IDEs – VS Code
+.vscode/
+
+# OS – macOS
+.DS_Store
+
+# OS – Windows
+Thumbs.db
