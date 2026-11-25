@@ -58,4 +58,4 @@ docker compose run --rm api npm test
 
 API docs: http://localhost:8000/api-docs/
 
-Without docker (Node 24+): `npm install`, then `npm run dev` and `npm test`. Checks: `npm run typecheck`, `npm run lint`.
+Without docker (Node 26+): `npm install`, then `npm run dev` and `npm test`. Checks: `npm run typecheck`, `npm run lint`.
