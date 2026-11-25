@@ -1,7 +1,7 @@
-FROM node:24-alpine
+FROM node:24.22.3-alpine
 WORKDIR /app
-COPY package*.json ./
+COPY package*.json prisma.config.ts ./
 COPY src/prisma src/prisma
 RUN npm ci
 EXPOSE 8000
-CMD ["sh", "-c", "npx prisma db push && npx tsx watch src/server.ts"]
+CMD ["npm", "run", "dev"]

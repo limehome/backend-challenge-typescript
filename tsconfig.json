@@ -1,14 +1,26 @@
 {
-    "compilerOptions": {
-        "forceConsistentCasingInFileNames": true,
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "outDir": "./build",
-        "rootDir": "./src",
-        "target": "ES2022",
-        "lib": ["ES2022"],
-        "skipLibCheck": true,
-        "strict": true,
-        "resolveJsonModule": true
-    }
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2023",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUncheckedSideEffectImports": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "erasableSyntaxOnly": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src", "test", "prisma.config.ts", "vitest.config.ts"]
 }
