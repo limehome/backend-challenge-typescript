@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import prisma from '../prisma.js';
+import type { Request, Response } from 'express';
+import prisma from '../prisma.ts';
 
 interface Booking {
     guestName: string;
@@ -8,13 +8,13 @@ interface Booking {
     numberOfNights: number;
 }
 
-const healthCheck = async (req: Request, res: Response, next: NextFunction) => {
+const healthCheck = async (_req: Request, res: Response) => {
     return res.status(200).json({
         message: "OK"
     })
 }
 
-const createBooking = async (req: Request, res: Response, next: NextFunction) => {
+const createBooking = async (req: Request, res: Response) => {
     const booking: Booking = req.body;
 
     const outcome = await isBookingPossible(booking);

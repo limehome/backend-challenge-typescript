@@ -1,5 +1,5 @@
 import express from 'express';
-import controller from '../controllers/bookings.js';
+import controller from '../controllers/bookings.ts';
 const router = express.Router();
 
 router.get('/', controller.healthCheck);

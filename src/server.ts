@@ -1,8 +1,8 @@
 import http from 'http';
-import express, { Express, NextFunction, Request, Response } from 'express';
+import express, { type Express, type Request, type Response } from 'express';
 import morgan from 'morgan';
-import routes from './routes/bookings.js';
-import prisma from './prisma.js';
+import routes from './routes/bookings.ts';
+import prisma from './prisma.ts';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './swagger.json' with { type: 'json' };
 
@@ -17,7 +17,7 @@ app.get('/api-docs', swaggerUi.setup(swaggerDocument));
 
 app.use('/', routes);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((_req: Request, res: Response) => {
     const error = new Error('Not found');
     res.status(404).json({
         message: error.message,
